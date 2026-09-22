@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pruebas · motor de triaje PaedCTAS</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 60rem; margin: 2rem auto; padding: 0 1rem; }
+  li { padding: .25rem .5rem; margin: .15rem 0; border-radius: 4px; }
+  .ok { background: #e6f4ea; } .ko { background: #fce8e6; }
+  #resumen { font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Pruebas del motor clínico (triaje.js)</h1>
+<p id="resumen">Ejecutando…</p>
+<ul id="lista"></ul>
+<script type="module">
+// Las pruebas viven en un módulo aparte para poder ejecutarlas también con Node.
+import { casos } from './test_triaje.js';
+const lista = document.getElementById('lista');
+let fallos = 0;
+for (const c of casos) {
+  const li = document.createElement('li');
+  li.className = c.ok ? 'ok' : 'ko';
+  li.textContent = `${c.ok ? '✔' : '✘'} ${c.nombre} → esperado ${c.esperado}, obtenido ${c.obtenido}`;
+  if (!c.ok) fallos++;
+  lista.appendChild(li);
+}
+document.getElementById('resumen').textContent =
+  fallos === 0 ? `Todo verde: ${casos.length} casos.` : `${fallos} de ${casos.length} casos fallan.`;
+</script>
+</body>
+</html>

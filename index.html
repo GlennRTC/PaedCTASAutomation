@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triaje pediátrico · PaedCTAS (simulador)</title>
+<style>
+  /* ---------- Tokens (estilo "accesible y ético": cian calmado + verde salud) ---------- */
+  :root {
+    --primario: #0891b2; --primario-oscuro: #0e7490; --sobre-primario: #fff;
+    --acento: #059669;
+    --texto: #164e63; --texto-suave: #4b6b78; --texto-tenue: #7a919c;
+    --fondo: #f4f9fb; --tarjeta: #fff; --suave: #e8f1f6; --borde: #cfe3ea; --borde-fuerte: #9fc4d0;
+    --peligro: #dc2626;
+    --ctas-1: #1d4ed8; --ctas-2: #dc2626; --ctas-3: #facc15; --ctas-4: #16a34a; --ctas-5: #f8fafc;
+    --radio: 12px; --radio-s: 8px;
+    --sombra: 0 1px 2px rgba(22,78,99,.06), 0 4px 16px rgba(22,78,99,.06);
+    --transicion: 200ms ease;
+    --toque: 44px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { font-size: 16px; }
+  body { margin: 0; font-family: "Figtree", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         color: var(--texto); background: var(--fondo); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+  /* Enlace para saltar al resultado (teclado / lector de pantalla) */
+  .saltar { position: absolute; left: -999px; top: 8px; background: var(--primario); color: #fff; padding: .5rem .8rem; border-radius: var(--radio-s); z-index: 50; }
+  .saltar:focus { left: 8px; }
+
+  /* ---------- Cabecera ---------- */
+  header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+           border-bottom: 1px solid var(--borde); }
+  header .interior { max-width: 1200px; margin: 0 auto; padding: .8rem 1.5rem; display: flex; align-items: center; gap: .85rem; }
+  .marca { width: 36px; height: 36px; flex: none; border-radius: 10px; background: var(--primario); display: grid; place-items: center; }
+  .marca svg { width: 22px; height: 22px; }
+  header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -.01em; }
+  header p { margin: 0; font-size: .82rem; color: var(--texto-suave); }
+  header .aviso { margin-left: auto; font-size: .78rem; color: var(--texto-suave); background: var(--suave); padding: .3rem .65rem; border-radius: 999px; white-space: nowrap; }
+  @media (max-width: 700px) { header .aviso { display: none; } }
+
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 1.5rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 1rem; padding-bottom: 5.5rem; } }
+
+  /* ---------- Pasos (tarjetas plegables) ---------- */
+  details { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); margin-bottom: 1rem; box-shadow: var(--sombra); }
+  summary { padding: .9rem 1.1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; gap: .75rem; min-height: var(--toque);
+            border-radius: var(--radio); transition: background var(--transicion); }
+  summary:hover { background: var(--suave); }
+  summary:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
+  summary::-webkit-details-marker { display: none; }
+  summary .paso { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--suave); color: var(--primario-oscuro); font-size: .85rem; font-weight: 700; display: grid; place-items: center; }
+  details[open] summary .paso { background: var(--primario); color: #fff; }
+  summary .titulo { flex: 1; }
+  summary small { display: block; font-weight: 400; color: var(--texto-suave); font-size: .8rem; }
+  summary .flecha { width: 20px; height: 20px; color: var(--texto-tenue); transition: transform var(--transicion); }
+  details[open] summary .flecha { transform: rotate(180deg); }
+  .contenido { padding: .25rem 1.1rem 1.1rem; }
+
+  /* ---------- Campos ---------- */
+  .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .9rem 1rem; }
+  label { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; font-weight: 500; color: var(--texto-suave); }
+  label.linea { flex-direction: row; align-items: center; gap: .6rem; color: var(--texto); font-weight: 400; min-height: var(--toque); cursor: pointer; }
+  input, select, textarea, button { font: inherit; }
+  input:not([type=checkbox]):not([type=radio]), select, textarea {
+    min-height: var(--toque); padding: .55rem .7rem; border: 1px solid var(--borde-fuerte); border-radius: var(--radio-s); background: #fff; color: var(--texto); width: 100%;
+    transition: border-color var(--transicion), box-shadow var(--transicion); }
+  input:hover, select:hover, textarea:hover { border-color: var(--primario); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px rgba(8,145,178,.25); }
+  input[type=checkbox], input[type=radio] { width: 20px; height: 20px; accent-color: var(--primario); margin: 0; cursor: pointer; }
+  input[type=checkbox]:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
+  textarea { min-height: 5rem; resize: vertical; }
+  fieldset { border: 1px solid var(--borde); border-radius: var(--radio-s); padding: .5rem .9rem .6rem; margin: 0; }
+  legend { font-size: .85rem; font-weight: 500; color: var(--texto-suave); padding: 0 .3rem; }
+  .ancho { grid-column: 1 / -1; }
+  .ayuda { font-size: .8rem; color: var(--texto-suave); margin: .2rem 0 0; }
+  .edad { display: flex; gap: .5rem; } .edad input { flex: 1; min-width: 4.5rem; } .edad select { width: 6.5rem; flex: none; }
+
+  button { min-height: var(--toque); padding: .55rem 1rem; border: 1px solid var(--borde-fuerte); border-radius: var(--radio-s); background: #fff; color: var(--texto);
+           cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+           transition: background var(--transicion), border-color var(--transicion), transform 120ms ease, box-shadow var(--transicion); }
+  button:hover { background: var(--suave); border-color: var(--primario); }
+  button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
+  button.primario { background: var(--primario); color: var(--sobre-primario); border-color: var(--primario); }
+  button.primario:hover { background: var(--primario-oscuro); border-color: var(--primario-oscuro); }
+  button.peligro { color: var(--peligro); } button.peligro:hover { background: #fef2f2; border-color: var(--peligro); }
+  button svg { width: 18px; height: 18px; flex: none; }
+  .botones { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+  /* ---------- Hallazgos del relato ---------- */
+  .hallazgo { display: flex; gap: .65rem; align-items: center; padding: .5rem .7rem; border: 1px solid var(--borde); border-radius: var(--radio-s);
+              font-size: .86rem; margin: .35rem 0; background: #fff; transition: border-color var(--transicion); }
+  .hallazgo:hover { border-color: var(--borde-fuerte); }
+  .hallazgo input { flex: none; }
+  .hallazgo .nivel { font-weight: 700; min-width: 2.1rem; text-align: center; border-radius: 6px; padding: .15rem .35rem; font-size: .78rem; flex: none; }
+  .hallazgo .nivel.alerta { background: var(--suave); color: var(--texto-suave); font-weight: 500; }
+  .hallazgo .texto { flex: 1; }
+  .hallazgo .evidencia { color: var(--texto-suave); font-style: italic; display: block; font-size: .8rem; }
+  .hallazgo.negado { opacity: .6; } .hallazgo.negado .texto b { text-decoration: line-through; }
+  .hallazgo.descartado .texto { text-decoration: line-through; color: var(--texto-suave); }
+  .fuente { color: var(--texto-tenue); font-size: .78rem; font-weight: 400; }
+
+  /* ---------- Visor 3D ---------- */
+  .visor { position: relative; height: 460px; border-radius: var(--radio); overflow: hidden; border: 1px solid var(--borde);
+           background: radial-gradient(ellipse at 50% 35%, #ffffff 0%, #e9f3f7 60%, #d9e9ef 100%); }
+  .visor canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  .visor canvas:active { cursor: grabbing; }
+  .visor .botones { position: absolute; top: .75rem; left: .75rem; }
+  .visor .botones button { background: rgba(255,255,255,.92); backdrop-filter: blur(4px); }
+  .visor .leyenda { position: absolute; bottom: .75rem; left: .75rem; right: .75rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+                    font-size: .78rem; color: var(--texto-suave); pointer-events: none; }
+  .visor .leyenda span { background: rgba(255,255,255,.85); padding: .25rem .6rem; border-radius: 999px; display: inline-flex; align-items: center; gap: .35rem; }
+  .visor .leyenda svg { width: 14px; height: 14px; }
+  .visor .region { position: absolute; top: .75rem; right: .75rem; background: rgba(22,78,99,.85); color: #fff; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; pointer-events: none; transition: opacity var(--transicion); }
+  @media (max-width: 600px) { .visor { height: 380px; } }
+  #listaPines { list-style: none; padding: 0; margin: .5rem 0 0; }
+  #listaPines li { display: flex; gap: .65rem; align-items: center; padding: .5rem 0; border-top: 1px solid var(--borde); font-size: .9rem; min-height: var(--toque); }
+  #listaPines li span.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--peligro); flex: none; box-shadow: 0 0 0 3px #fee2e2; }
+  #listaPines li .texto { flex: 1; }
+  #listaPines li .nota { color: var(--texto-suave); font-size: .82rem; }
+
+  dialog { border: 1px solid var(--borde); border-radius: 16px; padding: 1.4rem; max-width: 440px; width: calc(100% - 2rem); box-shadow: 0 20px 60px rgba(22,78,99,.25); color: var(--texto); }
+  dialog::backdrop { background: rgba(22,78,99,.35); backdrop-filter: blur(2px); }
+  dialog h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
+  .caras { display: flex; justify-content: space-between; gap: .3rem; margin: .6rem 0 .8rem; }
+  .caras label { align-items: center; cursor: pointer; font-size: .82rem; color: var(--texto); gap: .2rem; min-width: var(--toque); }
+  .caras input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .caras svg { width: 52px; height: 52px; border-radius: 50%; border: 3px solid transparent; transition: transform 120ms ease, border-color var(--transicion), background var(--transicion); }
+  .caras label:hover svg { transform: scale(1.06); }
+  .caras input:checked + svg { border-color: var(--primario); background: var(--suave); }
+  .caras input:focus-visible + svg { outline: 3px solid var(--primario); outline-offset: 2px; }
+
+  /* ---------- Tarjeta de resultado ---------- */
+  aside { position: sticky; top: 4.6rem; align-self: start; }
+  @media (max-width: 900px) { aside { position: static; order: -1; } }
+  .resultado { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; box-shadow: var(--sombra); }
+  .banda { padding: 1.5rem 1rem 1.1rem; text-align: center; transition: background var(--transicion), color var(--transicion); }
+  .banda .etiqueta { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+  .banda .romano { font-size: 3.4rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; margin-top: .2rem; }
+  .banda .nombre { font-size: 1.05rem; font-weight: 600; margin-top: .3rem; }
+  .banda .tiempo { font-size: .9rem; opacity: .9; }
+  .provisional { display: inline-block; margin-top: .6rem; font-size: .7rem; letter-spacing: .08em; padding: .2rem .6rem; border-radius: 999px; background: rgba(0,0,0,.15); }
+  .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: .75rem 1rem 0; }
+  .escala span { height: 8px; border-radius: 4px; opacity: .3; transition: opacity var(--transicion), transform var(--transicion); }
+  .escala span.activo { opacity: 1; transform: scaleY(1.6); }
+  .escala-etq { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: .3rem 1rem 0; font-size: .7rem; color: var(--texto-tenue); text-align: center; }
+  .resultado .cuerpo { padding: .9rem 1rem; }
+  .resultado h2 { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--texto-suave); margin: 0 0 .5rem; }
+  #reglas { margin: 0; padding: 0; list-style: none; font-size: .88rem; }
+  #reglas li { margin: .35rem 0; padding-left: .75rem; border-left: 3px solid var(--borde-fuerte); }
+  #reglas li.nota { border-left-color: var(--borde); color: var(--texto-suave); }
+  .acciones { padding: .9rem 1rem; border-top: 1px solid var(--borde); display: grid; gap: .55rem; }
+
+  /* Barra fija en móvil con el nivel actual */
+  .barra-movil { display: none; }
+  @media (max-width: 900px) {
+    .barra-movil { display: flex; position: fixed; left: .75rem; right: .75rem; bottom: .75rem; z-index: 30; align-items: center; gap: .8rem; padding: .6rem .9rem;
+                   border-radius: var(--radio); box-shadow: 0 8px 30px rgba(22,78,99,.3); text-decoration: none; min-height: var(--toque); }
+    .barra-movil .romano { font-size: 1.6rem; font-weight: 800; }
+    .barra-movil .txt { flex: 1; font-size: .85rem; line-height: 1.25; }
+    .barra-movil .txt b { display: block; }
+  }
+
+  footer { text-align: center; color: var(--texto-suave); font-size: .8rem; padding: 1.25rem 1rem 2rem; }
+  #referencias { max-width: 1200px; margin: 0 auto 1rem; }
+  @media (min-width: 901px) { #referencias { margin-left: auto; margin-right: auto; width: calc(100% - 3rem); } }
+  #referencias ol { font-size: .85rem; padding-left: 1.4rem; } #referencias li { margin: .35rem 0; }
+
+  /* ---------- Informe: oculto en pantalla, único visible al imprimir ---------- */
+  #informe { display: none; }
+  @media print {
+    @page { size: A4; margin: 15mm; }
+    body { background: #fff; color: #000; font-size: 11pt; font-family: "Noto Sans", system-ui, sans-serif; }
+    header, main, footer, dialog, #referencias, .barra-movil, .saltar { display: none !important; }
+    #informe { display: block; }
+    #informe h1 { font-size: 15pt; margin: 0; }
+    #informe .meta { color: #444; font-size: 9pt; margin-bottom: 8pt; }
+    #informe h2 { font-size: 11pt; margin: 8pt 0 3pt; border-bottom: 1px solid #999; padding-bottom: 2pt; }
+    #informe table { width: 100%; border-collapse: collapse; font-size: 10pt; break-inside: avoid; }
+    #informe th, #informe td { border: 1px solid #bbb; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+    #informe th { background: #f0f0f0; }
+    #informe .nivel { display: flex; align-items: center; gap: 12pt; padding: 8pt 12pt; border: 1px solid #999;
+                      -webkit-print-color-adjust: exact; print-color-adjust: exact; break-inside: avoid; }
+    #informe .nivel .romano { font-size: 28pt; font-weight: 700; }
+    #informe .figuras { display: flex; gap: 12pt; break-inside: avoid; }
+    #informe .figuras figure { margin: 0; text-align: center; font-size: 9pt; }
+    #informe .figuras img { width: 46mm; height: auto; border: 1px solid #ccc; }
+    #informe .pie { margin-top: 8pt; font-size: 8.5pt; color: #444; border-top: 1px solid #999; padding-top: 4pt; }
+    #informe p { margin: 3pt 0; }
+    #informe ul { margin: 2pt 0; padding-left: 14pt; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;700&display=swap">
+<!-- Three.js por CDN. Import map: "three" → núcleo, "three/addons/" → ejemplos jsm (OrbitControls). -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<a class="saltar" href="#banda">Saltar al resultado</a>
+<header>
+  <div class="interior">
+    <div class="marca" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-7-10.2A4.3 4.3 0 0 1 12 8a4.3 4.3 0 0 1 7 2.8C19 16.4 12 21 12 21z"/><path d="M9 12h2l1-2 1.5 4 1-2H16"/></svg></div>
+    <div><h1>Triaje pediátrico</h1><p>Pre-triaje con escala PaedCTAS · simulador</p></div>
+    <span class="aviso">Educativo · no sustituye la valoración clínica</span>
+  </div>
+</header>
+
+<main id="app">
+  <section>
+    <!-- ===== 1. Paciente (acudiente) ===== -->
+    <details open>
+      <summary><span class="paso">1</span><span class="titulo">Paciente<small>Lo rellena el acudiente</small></span><svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="contenido campos">
+        <label>Edad <span class="edad"><input type="number" id="edad" min="0" max="18" step="1" value="6"><select id="edadUnidad" aria-label="Unidad de edad"><option value="anos">años</option><option value="meses">meses</option></select></span></label>
+        <label>Sexo <select id="sexo"><option value="">—</option><option>Femenino</option><option>Masculino</option></select></label>
+        <label>Motivo de consulta <select id="motivo"></select></label>
+        <label id="lblGravedad" hidden>Descripción <select id="gravedad"></select></label>
+        <p class="ayuda ancho" id="ayudaMotivo"></p>
+        <label class="linea"><input type="checkbox" id="fiebreReciente"> Fiebre en las últimas 24 h</label>
+        <label class="linea"><input type="checkbox" id="inmunodeprimido"> Inmunodeprimido / enfermedad crónica grave</label>
+        <label class="ancho">Alergias <input type="text" id="alergias" placeholder="Ninguna conocida"></label>
+        <label class="ancho">¿Le han dado algo para lo que le pasa hoy? <input type="text" id="tratamientoActual" placeholder="Ej.: paracetamol 5 ml a las 10:00, salbutamol 2 inhalaciones; o «nada»"></label>
+        <label class="ancho">Tratamiento habitual / medicación crónica <input type="text" id="tratamientoHabitual" placeholder="Ej.: insulina, corticoides, quimioterapia; o «ninguno»"></label>
+        <label class="ancho">¿Qué le pasa? Cuéntalo con tus palabras <textarea id="relato" placeholder="Ej.: desde ayer tiene fiebre de 38,5, ha vomitado dos veces y está más dormido de lo normal"></textarea></label>
+        <div class="ancho" id="hallazgos" aria-live="polite"></div>
+        <p class="ayuda ancho" id="sinHallazgos">El sistema reconoce conceptos clave del relato (fiebre, dificultad para respirar, caídas, vómitos…), los estructura para el informe y los aplica al triaje. Enfermería puede desmarcar cualquiera.</p>
+      </div>
+    </details>
+
+    <!-- ===== 2. Dolor (acudiente + niño) ===== -->
+    <details open>
+      <summary><span class="paso">2</span><span class="titulo">¿Dónde le duele?<small>Gira la figura y toca la zona</small></span><svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="contenido">
+        <div class="visor">
+          <canvas id="canvas3d" aria-label="Figura del cuerpo humano. Toca una zona para marcar dolor."></canvas>
+          <div class="botones" role="group" aria-label="Vista de la figura">
+            <button type="button" data-vista="frente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M6 21v-3a6 6 0 0 1 12 0v3"/></svg>Frente</button>
+            <button type="button" data-vista="espalda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M6 21v-3a6 6 0 0 1 12 0v3"/><path d="M12 12v6"/></svg>Espalda</button>
+          </div>
+          <div class="region" id="regionCursor" hidden></div>
+          <div class="leyenda" aria-hidden="true">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11V6a2 2 0 1 1 4 0v5"/><path d="M13 10a2 2 0 1 1 4 0v3a6 6 0 0 1-12 0v-2a2 2 0 1 1 4 0"/></svg>Toca una zona para marcar dolor</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>Arrastra para girar</span>
+          </div>
+        </div>
+        <label class="linea"><input type="checkbox" id="dolorCronico"> Dolor crónico (más de 3 meses)</label>
+        <ul id="listaPines" aria-live="polite"></ul>
+        <p class="ayuda" id="sinPines">Sin zonas marcadas. Toca la figura para añadir una.</p>
+      </div>
+    </details>
+
+    <!-- ===== 3. Enfermería ===== -->
+    <details>
+      <summary><span class="paso">3</span><span class="titulo">Evaluación de enfermería<small>Opcional · sin esto el resultado es provisional</small></span><svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="contenido campos">
+        <label>Frecuencia respiratoria (rpm) <input type="number" id="fr" min="0" max="150"></label>
+        <label>Frecuencia cardíaca (lpm) <input type="number" id="fc" min="0" max="300"></label>
+        <label>SatO₂ (%) <input type="number" id="sat" min="50" max="100"></label>
+        <label>Temperatura (°C) <input type="number" id="temp" min="30" max="43" step="0.1"></label>
+        <label title="En menores de 2 años usar la respuesta verbal pediátrica: balbucea 5, llanto irritable 4, llora al dolor 3, gime al dolor 2, ninguna 1 [10].">Glasgow (3–15) <input type="number" id="gcs" min="3" max="15"></label>
+        <label>Criterios SIRS (0–4) <input type="number" id="sirs" min="0" max="4" value="0"></label>
+        <fieldset class="ancho">
+          <legend>Triángulo de evaluación pediátrica: marcar lo alterado</legend>
+          <div class="campos">
+            <label class="linea"><input type="checkbox" id="pat-apariencia"> Apariencia</label>
+            <label class="linea"><input type="checkbox" id="pat-respiracion"> Trabajo respiratorio</label>
+            <label class="linea"><input type="checkbox" id="pat-circulacion"> Circulación cutánea</label>
+          </div>
+        </fieldset>
+        <label>Dificultad respiratoria <select id="distRespiratoria">
+          <option value="ninguna">Ninguna</option><option value="leve">Leve</option><option value="moderada">Moderada</option><option value="grave">Grave</option></select></label>
+        <label>Estado hemodinámico <select id="hemodinamica">
+          <option value="normal">Normal</option><option value="deplecion">Depleción de volumen con SV anormales</option>
+          <option value="compromiso">Compromiso hemodinámico</option><option value="shock">Shock</option></select></label>
+        <label class="linea ancho" title="Tabla 7 de PaedCTAS: eyección de vehículo, vuelco, impacto >40 km/h sin sujeción, peatón/ciclista atropellado >10 km/h, caída >1 m o 5 escalones, lesión penetrante proximal a codo o rodilla, agresión con objeto contundente.">
+          <input type="checkbox" id="mecanismoAltoRiesgo"> Mecanismo de lesión de alto riesgo</label>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== Resultado ===== -->
+  <aside>
+    <div class="resultado">
+      <div class="banda" id="banda" tabindex="-1" aria-live="polite">
+        <div class="etiqueta">Nivel de triaje PaedCTAS</div>
+        <div class="romano" id="nivelRomano">—</div>
+        <div class="nombre" id="nivelNombre"></div>
+        <div class="tiempo" id="nivelTiempo"></div>
+        <span class="provisional" id="provisional" hidden>PROVISIONAL · sin signos vitales</span>
+      </div>
+      <div class="escala" id="escala" aria-hidden="true">
+        <span style="background:var(--ctas-1)"></span><span style="background:var(--ctas-2)"></span><span style="background:var(--ctas-3)"></span><span style="background:var(--ctas-4)"></span><span style="background:#cbd5e1"></span>
+      </div>
+      <div class="escala-etq" aria-hidden="true"><span>I</span><span>II</span><span>III</span><span>IV</span><span>V</span></div>
+      <div class="cuerpo">
+        <h2>Justificación</h2>
+        <ol id="reglas"></ol>
+        <p class="ayuda" id="impactoRelato" hidden></p>
+      </div>
+      <div class="acciones">
+        <button type="button" class="primario" id="btnExportar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg>Exportar informe (PDF)</button>
+        <select id="escenario" aria-label="Cargar escenario de ejemplo"><option value="">Cargar escenario de ejemplo…</option></select>
+        <button type="button" class="peligro" id="btnLimpiar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>Limpiar todo</button>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<a class="barra-movil" id="barraMovil" href="#banda" aria-label="Ver resultado del triaje"><span class="romano" id="barraRomano">—</span><span class="txt"><b id="barraNombre"></b><span id="barraTiempo"></span></span></a>
+
+<!-- Mini-formulario de pin (nativo <dialog>) -->
+<dialog id="dlgPin">
+  <form method="dialog" id="formPin">
+    <h3 id="dlgTitulo">Dolor en …</h3>
+    <p class="ayuda" style="margin:0 0 .5rem">¿Cuánto le duele? Escala de caras (FPS-R): 0 nada, 10 el peor dolor.</p>
+    <div class="caras" id="caras"></div>
+    <label>Nota para el médico <textarea id="pinNota" placeholder="Cómo es el dolor, desde cuándo, qué lo empeora…"></textarea></label>
+    <div class="botones" style="margin-top:.75rem;justify-content:flex-end">
+      <button type="button" class="peligro" id="btnBorrarPin" hidden>Borrar</button>
+      <button type="button" id="btnCancelarPin">Cancelar</button>
+      <button type="submit" class="primario">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Referencias -->
+<details id="referencias">
+  <summary><span class="titulo">Referencias médicas y publicaciones</span><svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+  <div class="contenido">
+  <ol>
+    <li>Warren DW, Jarvis A, LeBlanc L, Gravel J; CTAS National Working Group. Revisions to the Canadian Triage and Acuity Scale paediatric guidelines (PaedCTAS). <i>CJEM</i>. 2008;10(3):224-32.</li>
+    <li>Bullard MJ, Musgrave E, Warren D, et al. Revisions to the Canadian Emergency Department Triage and Acuity Scale (CTAS) Guidelines 2016. <i>CJEM</i>. 2017;19(S2):S18-27. doi:10.1017/cem.2017.365</li>
+    <li>Beveridge R, Clark B, Janes L, et al. Canadian Emergency Department Triage and Acuity Scale: implementation guidelines. <i>CJEM</i>. 1999;1(suppl):S2-28.</li>
+    <li>Warren D, Jarvis A, LeBlanc L; National Triage Task Force. Canadian Paediatric Triage and Acuity Scale: implementation guidelines for emergency departments. <i>CJEM</i>. 2001;3(suppl):S1-27.</li>
+    <li>Bullard MJ, Unger B, Spence J, Grafstein E; CTAS National Working Group. Revisions to the Canadian Emergency Department Triage and Acuity Scale (CTAS) adult guidelines. <i>CJEM</i>. 2008;10(2):136-42.</li>
+    <li>Grafstein E, Bullard MJ, Warren D, Unger B; CTAS National Working Group. Revision of the Canadian Emergency Department Information System (CEDIS) Presenting Complaint List version 1.1. <i>CJEM</i>. 2008;10(2):151-61.</li>
+    <li>Gravel J, Manzano S, Arsenault M. Safety of a modification of the triage level for febrile children 6 to 36 months old using the Paediatric Canadian Triage and Acuity Scale. <i>CJEM</i>. 2008;10(1):32-7.</li>
+    <li>Dieckmann RA, Brownstein D, Gausche-Hill M. The pediatric assessment triangle: a novel approach for the rapid evaluation of children. <i>Pediatr Emerg Care</i>. 2010;26(4):312-5.</li>
+    <li>Hicks CL, von Baeyer CL, Spafford PA, van Korlaar I, Goodenough B. The Faces Pain Scale–Revised: toward a common metric in pediatric pain measurement. <i>Pain</i>. 2001;93(2):173-83.</li>
+    <li>Reilly PL, Simpson DA, Sprod R, Thomas L. Assessing the conscious level in infants and young children: a paediatric version of the Glasgow Coma Scale. <i>Childs Nerv Syst</i>. 1988;4(1):30-3. doi:10.1007/BF00274080</li>
+    <li>Gravel J, Gouin S, Bailey B, Amre D. Reliability of a computerized version of the Pediatric Canadian Triage and Acuity Scale. <i>Acad Emerg Med</i>. 2007;14(10):864-9.</li>
+  </ol>
+  <p class="ayuda">Las caras de la escala de dolor son un dibujo propio equivalente en puntuación a la FPS-R (0, 2, 4, 6, 8, 10); no reproducen las imágenes originales de IASP.</p>
+  </div>
+</details>
+
+<footer>Prototipo de simulación con fines educativos. No introducir datos reales de pacientes.</footer>
+
+<!-- Informe clínico: lo rellena app.js antes de imprimir -->
+<section id="informe" aria-hidden="true"></section>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
