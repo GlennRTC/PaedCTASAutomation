@@ -37,16 +37,29 @@
   .saltar { position: absolute; left: -999px; top: 8px; background: var(--primario); color: #fff; padding: .5rem .8rem; border-radius: var(--radio-s); z-index: 50; }
   .saltar:focus { left: 8px; }
 
-  /* ---------- Cabecera ---------- */
-  header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.92); backdrop-filter: blur(6px);
+  /* ---------- Cabecera: barra fija fina con wordmark serif ---------- */
+  header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.9); backdrop-filter: blur(8px);
            border-bottom: 1px solid var(--borde); }
-  header .interior { max-width: 1200px; margin: 0 auto; padding: .8rem 1.5rem; display: flex; align-items: center; gap: .85rem; }
-  .marca { width: 36px; height: 36px; flex: none; border-radius: 10px; background: var(--primario); display: grid; place-items: center; }
-  .marca svg { width: 22px; height: 22px; }
-  header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -.01em; }
-  header p { margin: 0; font-size: .82rem; color: var(--texto-suave); }
-  header .aviso { margin-left: auto; font-size: .78rem; color: var(--texto-suave); background: var(--suave); padding: .3rem .65rem; border-radius: 999px; white-space: nowrap; }
+  header .interior { max-width: 1200px; margin: 0 auto; padding: .6rem 1.5rem; display: flex; align-items: center; gap: .7rem; }
+  .marca { width: 32px; height: 32px; flex: none; border-radius: 10px; display: grid; place-items: center;
+           background: linear-gradient(135deg, var(--primario), var(--primario-oscuro)); }
+  .marca svg { width: 20px; height: 20px; }
+  .marca-texto { font-family: var(--fuente-marca); font-weight: 700; font-size: 1.25rem; letter-spacing: -.01em; color: var(--texto); }
+  header .aviso { margin-left: auto; font-size: .78rem; color: var(--acento-oscuro); background: var(--azul-suave);
+                  border: 1px solid var(--azul-borde); padding: .3rem .7rem; border-radius: 999px; white-space: nowrap; }
   @media (max-width: 700px) { header .aviso { display: none; } }
+
+  /* ---------- Hero: degradado verde→menta, titular serif, tagline azul, chips de confianza ---------- */
+  .hero { background: linear-gradient(to bottom right, var(--suave), rgba(152,216,200,.2)); border-bottom: 1px solid var(--borde); }
+  .hero .interior { max-width: 1200px; margin: 0 auto; padding: 1.75rem 1.5rem 1.5rem; text-align: center; }
+  .hero h1 { margin: 0; font-family: var(--fuente-marca); font-weight: 700; font-size: clamp(1.9rem, 4vw, 2.75rem);
+             line-height: 1.1; letter-spacing: -.02em; color: var(--texto); }
+  .hero .tagline { margin: .4rem 0 0; font-family: var(--fuente-titulos); font-weight: 500; color: var(--acento); }
+  .hero .confianza { margin: .8rem 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.25rem;
+                     font-size: .8rem; color: var(--texto-tenue); }
+  .hero .confianza li { display: inline-flex; align-items: center; gap: .35rem; }
+  .hero .confianza svg { width: 14px; height: 14px; color: var(--primario); flex: none; }
+  @media (max-width: 600px) { .hero .interior { padding: 1.1rem 1rem 1rem; } .hero .confianza { display: none; } }
 
   main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 1.5rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
   @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 1rem; padding-bottom: 5.5rem; } }
@@ -181,7 +194,7 @@
   @media print {
     @page { size: A4; margin: 15mm; }
     body { background: #fff; color: #000; font-size: 11pt; font-family: "Noto Sans", system-ui, sans-serif; }
-    header, main, footer, dialog, #referencias, .barra-movil, .saltar { display: none !important; }
+    header, .hero, main, footer, dialog, #referencias, .barra-movil, .saltar { display: none !important; }
     #informe { display: block; }
     #informe h1 { font-size: 15pt; margin: 0; }
     #informe .meta { color: #444; font-size: 9pt; margin-bottom: 8pt; }
@@ -216,10 +229,23 @@
 <header>
   <div class="interior">
     <div class="marca" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-7-10.2A4.3 4.3 0 0 1 12 8a4.3 4.3 0 0 1 7 2.8C19 16.4 12 21 12 21z"/><path d="M9 12h2l1-2 1.5 4 1-2H16"/></svg></div>
-    <div><h1>Triaje pediátrico</h1><p>Pre-triaje con escala PaedCTAS · simulador</p></div>
+    <span class="marca-texto">PaedCTAS</span>
     <span class="aviso">Educativo · no sustituye la valoración clínica</span>
   </div>
 </header>
+
+<!-- Hero de marca: se desplaza con la página; la barra superior conserva el wordmark -->
+<section class="hero">
+  <div class="interior">
+    <h1>Triaje pediátrico</h1>
+    <p class="tagline">Pre-triaje con la escala PaedCTAS en minutos</p>
+    <ul class="confianza">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Escala validada (CJEM 2008, 2017)</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Datos solo en tu navegador</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>Informe clínico en PDF</li>
+    </ul>
+  </div>
+</section>
 
 <main id="app">
   <section>
