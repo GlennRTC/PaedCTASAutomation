@@ -35,6 +35,16 @@ for (const [t, f] of pares) {
   comprobar(`${t} sobre ${f}`, r >= 4.5, ` → ${r.toFixed(2)}:1`);
 }
 
+// Texto sobre degradados (no son pares de tokens): se compara con el punto más claro del degradado,
+// muestreado en captura a 1440 px. Hero: verde-50 → menta 20 % ≈ #e9f6f2.
+const colorDe = selector => {
+  const regla = html.match(new RegExp(selector.replace(/[.#]/g, '\\$&') + '\\s*{([^}]*)}'))?.[1] || '';
+  const c = regla.match(/(?:^|;|\s)color:\s*([^;]+);/)?.[1].trim() || '';
+  return c.startsWith('var(') ? v[c.slice(6, -1)] : c;
+};
+const chips = colorDe('.hero .confianza');
+comprobar('chips del hero sobre degradado', !!chips && contraste(chips, '#e9f6f2') >= 4.5, ` → ${chips ? contraste(chips, '#e9f6f2').toFixed(2) : '?'}:1`);
+
 // Colores de nivel PaedCTAS: no forman parte de la marca y no pueden cambiar.
 const CTAS = { 'ctas-1': '#1d4ed8', 'ctas-2': '#dc2626', 'ctas-3': '#facc15', 'ctas-4': '#16a34a', 'ctas-5': '#f8fafc' };
 for (const [k, esperado] of Object.entries(CTAS)) comprobar(`${k} intacto`, v[k] === esperado, ` → ${v[k]}`);

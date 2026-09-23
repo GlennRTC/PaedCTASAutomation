@@ -347,6 +347,9 @@ $('btnExportar').addEventListener('click', () => {
 // ---------- Arranque ----------
 $('motivo').append(...MOTIVOS.map(m => new Option(m.etiqueta, m.clave)));
 $('motivo').addEventListener('change', () => actualizarGravedad());
+// La barra móvil repite la tarjeta de resultado: se oculta mientras la tarjeta está a la vista,
+// así no tapa sus botones (p. ej. «Limpiar todo») en pantallas bajas.
+new IntersectionObserver(([e]) => { $('barraMovil').hidden = e.isIntersecting; }).observe(document.querySelector('.resultado'));
 $('app').addEventListener('input', recalcular);
 $('app').addEventListener('change', recalcular);
 escribirFormulario();
