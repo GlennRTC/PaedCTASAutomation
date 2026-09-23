@@ -65,14 +65,19 @@
   @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 1rem; padding-bottom: 5.5rem; } }
 
   /* ---------- Pasos (tarjetas plegables) ---------- */
-  details { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); margin-bottom: 1rem; box-shadow: var(--sombra); }
+  details { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); margin-bottom: 1rem; box-shadow: var(--sombra);
+            transition: box-shadow var(--transicion); }
+  details:hover { box-shadow: var(--sombra-alta); }
+  summary .titulo { font-family: var(--fuente-titulos); }
   summary { padding: .9rem 1.1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; gap: .75rem; min-height: var(--toque);
             border-radius: var(--radio); transition: background var(--transicion); }
   summary:hover { background: var(--suave); }
   summary:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
   summary::-webkit-details-marker { display: none; }
-  summary .paso { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--suave); color: var(--primario-oscuro); font-size: .85rem; font-weight: 700; display: grid; place-items: center; }
-  details[open] summary .paso { background: var(--primario); color: #fff; }
+  /* Número de paso como baldosa pastel (iconos de tarjeta de Bioprognostika) */
+  summary .paso { width: 36px; height: 36px; flex: none; border-radius: 12px; background: var(--suave); color: var(--primario); font-size: .9rem; font-weight: 700;
+                  display: grid; place-items: center; border: 1px solid #dcfce7; }
+  details[open] summary .paso { background: linear-gradient(135deg, var(--primario), var(--primario-oscuro)); color: var(--sobre-primario); border-color: transparent; }
   summary .titulo { flex: 1; }
   summary small { display: block; font-weight: 400; color: var(--texto-suave); font-size: .8rem; }
   summary .flecha { width: 20px; height: 20px; color: var(--texto-tenue); transition: transform var(--transicion); }
@@ -88,7 +93,7 @@
     min-height: var(--toque); padding: .55rem .7rem; border: 1px solid var(--borde-fuerte); border-radius: var(--radio-s); background: #fff; color: var(--texto); width: 100%;
     transition: border-color var(--transicion), box-shadow var(--transicion); }
   input:hover, select:hover, textarea:hover { border-color: var(--primario); }
-  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px rgba(8,145,178,.25); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--primario); box-shadow: var(--anillo); }
   input[type=checkbox], input[type=radio] { width: 20px; height: 20px; accent-color: var(--primario); margin: 0; cursor: pointer; }
   input[type=checkbox]:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
   textarea { min-height: 5rem; resize: vertical; }
@@ -102,11 +107,16 @@
            cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
            transition: background var(--transicion), border-color var(--transicion), transform 120ms ease, box-shadow var(--transicion); }
   button:hover { background: var(--suave); border-color: var(--primario); }
+  /* Secundario = botón "See How It Works": contorno y fondo azul claro */
+  button.secundario { background: var(--azul-suave); border-color: var(--azul-borde); color: var(--acento-oscuro); }
+  button.secundario:hover { background: #dbeafe; border-color: var(--acento); }
   button:active { transform: translateY(1px); }
   button:focus-visible { outline: 3px solid var(--primario); outline-offset: 2px; }
-  button.primario { background: var(--primario); color: var(--sobre-primario); border-color: var(--primario); }
-  button.primario:hover { background: var(--primario-oscuro); border-color: var(--primario-oscuro); }
-  button.peligro { color: var(--peligro); } button.peligro:hover { background: #fef2f2; border-color: var(--peligro); }
+  /* Primario = CTA de Bioprognostika, un paso más oscuro para AA (ver tokens) */
+  button.primario { background: linear-gradient(135deg, var(--primario), var(--primario-oscuro)); color: var(--sobre-primario); border-color: transparent;
+                    font-weight: 600; box-shadow: var(--sombra); }
+  button.primario:hover { background: var(--primario-oscuro); box-shadow: var(--sombra-alta); }
+  button.peligro { color: var(--peligro); background: var(--tarjeta); } button.peligro:hover { background: #fef2f2; border-color: var(--peligro); }
   button svg { width: 18px; height: 18px; flex: none; }
   .botones { display: flex; gap: .5rem; flex-wrap: wrap; }
 
@@ -125,7 +135,7 @@
 
   /* ---------- Visor 3D ---------- */
   .visor { position: relative; height: 460px; border-radius: var(--radio); overflow: hidden; border: 1px solid var(--borde);
-           background: radial-gradient(ellipse at 50% 35%, #ffffff 0%, #e9f3f7 60%, #d9e9ef 100%); }
+           background: radial-gradient(ellipse at 50% 35%, #ffffff 0%, var(--suave) 60%, #dcefe7 100%); }
   .visor canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
   .visor canvas:active { cursor: grabbing; }
   .visor .botones { position: absolute; top: .75rem; left: .75rem; }
@@ -134,7 +144,7 @@
                     font-size: .78rem; color: var(--texto-suave); pointer-events: none; }
   .visor .leyenda span { background: rgba(255,255,255,.85); padding: .25rem .6rem; border-radius: 999px; display: inline-flex; align-items: center; gap: .35rem; }
   .visor .leyenda svg { width: 14px; height: 14px; }
-  .visor .region { position: absolute; top: .75rem; right: .75rem; background: rgba(22,78,99,.85); color: #fff; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; pointer-events: none; transition: opacity var(--transicion); }
+  .visor .region { position: absolute; top: .75rem; right: .75rem; background: rgba(17,24,39,.82); color: #fff; font-size: .8rem; padding: .3rem .65rem; border-radius: 999px; pointer-events: none; transition: opacity var(--transicion); }
   @media (max-width: 600px) { .visor { height: 380px; } }
   #listaPines { list-style: none; padding: 0; margin: .5rem 0 0; }
   #listaPines li { display: flex; gap: .65rem; align-items: center; padding: .5rem 0; border-top: 1px solid var(--borde); font-size: .9rem; min-height: var(--toque); }
@@ -142,9 +152,9 @@
   #listaPines li .texto { flex: 1; }
   #listaPines li .nota { color: var(--texto-suave); font-size: .82rem; }
 
-  dialog { border: 1px solid var(--borde); border-radius: 16px; padding: 1.4rem; max-width: 440px; width: calc(100% - 2rem); box-shadow: 0 20px 60px rgba(22,78,99,.25); color: var(--texto); }
-  dialog::backdrop { background: rgba(22,78,99,.35); backdrop-filter: blur(2px); }
-  dialog h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
+  dialog { border: 1px solid var(--borde); border-radius: var(--radio-l); padding: 1.4rem; max-width: 440px; width: calc(100% - 2rem); box-shadow: 0 25px 50px -12px rgba(17,24,39,.25); color: var(--texto); }
+  dialog::backdrop { background: rgba(17,24,39,.35); backdrop-filter: blur(2px); }
+  dialog h3 { margin: 0 0 .25rem; font-size: 1.1rem; font-family: var(--fuente-titulos); }
   .caras { display: flex; justify-content: space-between; gap: .3rem; margin: .6rem 0 .8rem; }
   .caras label { align-items: center; cursor: pointer; font-size: .82rem; color: var(--texto); gap: .2rem; min-width: var(--toque); }
   .caras input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -156,7 +166,8 @@
   /* ---------- Tarjeta de resultado ---------- */
   aside { position: sticky; top: 4.6rem; align-self: start; }
   @media (max-width: 900px) { aside { position: static; order: -1; } }
-  .resultado { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; box-shadow: var(--sombra); }
+  .resultado { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio-l); overflow: hidden; box-shadow: var(--sombra-alta); }
+  .banda .nombre, .resultado h2 { font-family: var(--fuente-titulos); }
   .banda { padding: 1.5rem 1rem 1.1rem; text-align: center; transition: background var(--transicion), color var(--transicion); }
   .banda .etiqueta { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
   .banda .romano { font-size: 3.4rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; margin-top: .2rem; }
@@ -178,14 +189,17 @@
   .barra-movil { display: none; }
   @media (max-width: 900px) {
     .barra-movil { display: flex; position: fixed; left: .75rem; right: .75rem; bottom: .75rem; z-index: 30; align-items: center; gap: .8rem; padding: .6rem .9rem;
-                   border-radius: var(--radio); box-shadow: 0 8px 30px rgba(22,78,99,.3); text-decoration: none; min-height: var(--toque); }
+                   border-radius: var(--radio); box-shadow: 0 8px 30px rgba(17,24,39,.3); text-decoration: none; min-height: var(--toque); }
     .barra-movil .romano { font-size: 1.6rem; font-weight: 800; }
     .barra-movil .txt { flex: 1; font-size: .85rem; line-height: 1.25; }
     .barra-movil .txt b { display: block; }
   }
 
   footer { text-align: center; color: var(--texto-suave); font-size: .8rem; padding: 1.25rem 1rem 2rem; }
-  #referencias { max-width: 1200px; margin: 0 auto 1rem; }
+  /* Panel salvia tenue, como "Clinical Evidence Foundation" de Bioprognostika */
+  #referencias { max-width: 1200px; margin: 0 auto 1rem; background: linear-gradient(135deg, #fafaf9, rgba(135,169,107,.1));
+                 border-color: rgba(135,169,107,.3); }
+  #referencias summary .titulo { color: var(--primario); }
   @media (min-width: 901px) { #referencias { margin-left: auto; margin-right: auto; width: calc(100% - 3rem); } }
   #referencias ol { font-size: .85rem; padding-left: 1.4rem; } #referencias li { margin: .35rem 0; }
 
@@ -359,7 +373,7 @@
     <label>Nota para el médico <textarea id="pinNota" placeholder="Cómo es el dolor, desde cuándo, qué lo empeora…"></textarea></label>
     <div class="botones" style="margin-top:.75rem;justify-content:flex-end">
       <button type="button" class="peligro" id="btnBorrarPin" hidden>Borrar</button>
-      <button type="button" id="btnCancelarPin">Cancelar</button>
+      <button type="button" class="secundario" id="btnCancelarPin">Cancelar</button>
       <button type="submit" class="primario">Guardar</button>
     </div>
   </form>
