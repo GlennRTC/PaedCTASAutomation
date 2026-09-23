@@ -5,23 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Triaje pediátrico · PaedCTAS (simulador)</title>
 <style>
-  /* ---------- Tokens (estilo "accesible y ético": cian calmado + verde salud) ---------- */
+  /* ---------- Tokens · marca Bioprognostika (verde salud + azul confianza + menta/salvia) ----------
+     Verde primario un paso más oscuro que el original (#22c55e→#16a34a) para cumplir WCAG AA
+     con texto blanco. Los colores --ctas-* son estándar clínico PaedCTAS: NO son marca. */
   :root {
-    --primario: #0891b2; --primario-oscuro: #0e7490; --sobre-primario: #fff;
-    --acento: #059669;
-    --texto: #164e63; --texto-suave: #4b6b78; --texto-tenue: #7a919c;
-    --fondo: #f4f9fb; --tarjeta: #fff; --suave: #e8f1f6; --borde: #cfe3ea; --borde-fuerte: #9fc4d0;
+    --primario: #15803d; --primario-oscuro: #166534; --sobre-primario: #fff;
+    --acento: #2563eb; --acento-oscuro: #1d4ed8; --azul-suave: #eff6ff; --azul-borde: #bfdbfe;
+    --texto: #111827; --texto-suave: #4b5563; --texto-tenue: #6b7280;
+    --fondo: #f9fafb; --tarjeta: #fff; --suave: #f0fdf4; --borde: #e5e7eb; --borde-fuerte: #d1d5db;
+    --menta: #98d8c8; --salvia: #87a96b;
     --peligro: #dc2626;
     --ctas-1: #1d4ed8; --ctas-2: #dc2626; --ctas-3: #facc15; --ctas-4: #16a34a; --ctas-5: #f8fafc;
-    --radio: 12px; --radio-s: 8px;
-    --sombra: 0 1px 2px rgba(22,78,99,.06), 0 4px 16px rgba(22,78,99,.06);
+    --radio: 16px; --radio-s: 10px; --radio-l: 24px;
+    --sombra: 0 4px 6px -1px rgba(34,197,94,.1), 0 2px 4px -1px rgba(34,197,94,.06);
+    --sombra-alta: 0 10px 15px -3px rgba(17,24,39,.08), 0 4px 6px -4px rgba(17,24,39,.06);
+    --anillo: 0 0 0 3px rgba(21,128,61,.25);
+    --fuente-marca: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+    --fuente-titulos: "IBM Plex Sans", system-ui, sans-serif;
+    --fuente-texto: "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --transicion: 200ms ease;
     --toque: 44px;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { font-size: 16px; }
-  body { margin: 0; font-family: "Figtree", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  body { margin: 0; font-family: var(--fuente-texto);
          color: var(--texto); background: var(--fondo); line-height: 1.5; -webkit-font-smoothing: antialiased; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
@@ -193,7 +201,8 @@
   }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Sans:wght@500;600&family=Source+Sans+3:wght@400;500;600;700&family=Noto+Sans:wght@400;700&display=swap">
 <!-- Three.js por CDN. Import map: "three" → núcleo, "three/addons/" → ejemplos jsm (OrbitControls). -->
 <script type="importmap">
 { "imports": {
