@@ -77,7 +77,7 @@ export function crearCuerpo(canvas, eventos) {
     const golpe = sobrePin ? null : rayo.intersectObjects(cuerpo.children)[0];
     const malla = golpe?.object || null;
     if (resaltada && resaltada !== malla) resaltada.material.emissive.setHex(0x000000);
-    if (malla && malla !== resaltada) malla.material.emissive.setHex(0x0e5a6a);
+    if (malla && malla !== resaltada) malla.material.emissive.setHex(0x14532d); // verde marca (green-900), tenue sobre la piel
     resaltada = malla;
     canvas.style.cursor = sobrePin || malla ? 'pointer' : 'grab';
     eventos.onHover?.(malla ? (malla.name === 'tronco' ? regionTronco(golpe.point.y) : malla.name) : null);

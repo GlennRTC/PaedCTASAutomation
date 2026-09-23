@@ -66,8 +66,8 @@ python3 -m http.server 8000
 | `http://localhost:8000/` | Aplicación |
 | `http://localhost:8000/test_triaje.html` | Pruebas del motor clínico en el navegador |
 
-Dependencias externas cargadas por CDN la primera vez: Three.js 0.186 (jsDelivr) y las fuentes Figtree y
-Noto Sans (Google Fonts). Sin conexión la aplicación funciona con la tipografía del sistema, pero el visor 3D
+Dependencias externas cargadas por CDN la primera vez: Three.js 0.186 (jsDelivr) y las fuentes Source Serif 4,
+IBM Plex Sans, Source Sans 3 y Noto Sans (Google Fonts). Sin conexión la aplicación funciona con la tipografía del sistema, pero el visor 3D
 necesita haber cacheado Three.js.
 
 Pruebas sin navegador (Node 18 o superior):
@@ -75,6 +75,7 @@ Pruebas sin navegador (Node 18 o superior):
 ```bash
 node test_triaje.js   # motor clínico
 node test_relato.js   # extractor del relato
+node test_marca.js    # contraste WCAG de la marca y colores CTAS intactos
 ```
 
 ---
@@ -111,6 +112,7 @@ relato.js           Extractor determinista del relato libre, puro: analizarRelat
 cuerpo3d.js         Figura 3D de primitivas, cámara orbital, raycast, pines, capturas para el informe
 test_triaje.js      Casos clínicos del motor (Node o navegador vía test_triaje.html)
 test_relato.js      Casos del extractor (Node)
+test_marca.js       Contraste WCAG de los tokens de marca y colores CTAS intactos (Node)
 docs/superpowers/specs/2026-09-21-triaje-pediatrico-design.md   Documento de diseño
 ```
 
@@ -233,9 +235,12 @@ oculta la aplicación y muestra solo el informe en A4. Contenido, en orden clín
 
 ## Diseño de la interfaz
 
-Sistema de diseño elaborado con el skill *ui-ux-pro-max*, estilo "accesible y ético" recomendado para
-sanidad: paleta cian calmado y verde salud (primario `#0891b2`, acento `#059669`, texto `#164e63`),
-tipografía Figtree y Noto Sans a 16 px, objetivos táctiles de 44 px, anillos de foco de 3 px,
+**Marca.** Identidad visual adaptada de Bioprognostika: Source Serif 4 (wordmark y titular), IBM Plex Sans
+(títulos), Source Sans 3 (texto) a 16 px; verde salud `#15803d`, azul `#2563eb`, menta `#98d8c8` y salvia
+`#87a96b`; hero con degradado verde→menta, tarjetas con sombra verde tenue y panel salvia para las referencias.
+El verde del botón principal es un paso más oscuro que el original para cumplir WCAG AA con texto blanco.
+Los colores de nivel PaedCTAS son estándar clínico y no forman parte de la marca; el informe impreso no cambia.
+Se mantienen objetivos táctiles de 44 px, anillos de foco de 3 px,
 transiciones de 120–200 ms, `prefers-reduced-motion`, iconos SVG y colores CTAS reservados al resultado.
 Pasos numerados, tarjeta de resultado con escala de los cinco niveles y barra fija inferior en pantallas
 menores de 900 px.
@@ -248,6 +253,7 @@ menores de 900 px.
 |---|---|---|
 | Motor clínico | `node test_triaje.js` o `test_triaje.html` | 44 casos: tablas por edad, límites compartidos, fiebre por edad, dolor, GCS, PAT, SIRS, motivos, regla maestra, hallazgos del relato |
 | Extractor | `node test_relato.js` | 18 casos: acentos, negación, "no para de", temperatura, caídas, criterios de lactante |
+| Marca | `node test_marca.js` | Contraste AA de los tokens, colores de nivel PaedCTAS sin cambios, pilas de fuentes con genérica final |
 | Interfaz | Checklist manual | Ver abajo |
 
 Checklist manual:
